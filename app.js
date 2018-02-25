@@ -64,6 +64,45 @@ con.connect(function(err) {
     console.log("Connected!");
 });
 
+var s3 = new aws.S3({ accessKeyId:config.s3.accessKeyId , secretAccessKey:config.s3.secretAccessKey, region:config.s3.region });
+
+var upload = multer({
+    storage: multerS3({
+        s3: s3,
+        bucket: 'kisanx',
+        acl: 'public-read',
+        contentType: function(req, file, cb){
+            cb(null, file.mimetype);
+        },
+        key: function (req, file, cb) {
+            console.log(file);
+            cb(null, "app-uploads/" + Date.now().toString() + "-" + file.originalname)
+        }
+    })
+});
+
+
+/*app.post('/upload', upload.array('photos', 3), function(req, res, next) {
+    res.send('Successfully uploaded ' + req.files.length + ' files!')
+})*/
+
+app.post('/upload', upload.array('image', 2), function(req, res, next) {
+    try{var links=[];
+        for(var i = 0 ;i< req.files.length;i++)links.push(req.files[i]['location']);
+        res.status(200).json({
+            "status":"200",
+            "url":links
+        });
+    }catch(e){
+        console.log("catch e wala part");
+        res.status(500).json({
+            "status":"500",
+            "message":e
+        });
+    }
+});
+
+
 /*app.use('/', index);
 app.use('/users', users);*/
 
