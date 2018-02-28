@@ -134,6 +134,7 @@ var password = req.body.password;
         if(error) throw err;
         else{
             if(results.length==0){
+                var reg_done=0;
                 con.query("INSERT INTO login values(?,?)",[userid,password],function (error, results, fields){
                     if(error) throw err;
                     else{
