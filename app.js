@@ -114,7 +114,7 @@ app.post("/login",function(req,res){
     var password = req.body.password;
     var session;
     con.query("SELECT * from login where userid=? AND password=?",[userid,password],function (error, results, fields){
-       if(error) throw err;
+       if(error) throw error;
        else{
            if(results.length!=1){
                return res.status(401).json({"error":"user details incorrect"});
@@ -149,24 +149,49 @@ var password = req.body.password;
 });
 
 app.post("/new/registration",function(req,res){
-    var userid = req.body.userid;
-    var password = req.body.password;
-    if(userid==undefined)return res.status(400).json({error:"Userid required"});
-    con.query("SELECT userid FROM login where userid=?",[userid],function (error, results, fields){
-        if(error) throw err;
-        else{
-            if(results.length==0){
-                con.query("INSERT INTO login values(?,?)",[userid,password],function (error, results, fields){
-                    if(error) throw err;
-                    else{
-                        return res.status(200).json({"userid":userid,"message":userid +"successfully created"});
-                    }
-                })
-            }
+    var Gender = req.body.Gender;
+    var Name = req.body.Name;
+    var Qualification = req.body.Qualification;
+    var DOB = req.body.DOB; //DATE - format YYYY-MM-DD
+    var Age = calculate_age(parseInt(DOB.split("-")[1]),parseInt(DOB.split("-")[2]),parseInt(DOB.split("-")[0]));
+    var Religion = req.body.Religion;
+    var State = req.body.State;
+    var District = req.body.District;
+    var Taluka = req.body.Taluka;
+    var Village = req.body.Village;
+    var Height = req.body.Height;
+    var Build = req.body.Build;
+    var userid= req.body.userid;
+    var Profile_Pic="";
+    var Longitude=1;
+    var Latitude=1;
+    var Timeofbirth="00:00:00";
+
+    if(Gender=="male"||Gender=="Male"||Gender=="MALE"){
+
+        var Total_Land =req.body.Total_Land ;
+        var Yearly_Income = req.body.Yearly_Income;
+        //var 7/12_coordinates;
+    }
+    else if(Gender=="female"||Gender=="Female"||Gender=="FEMALE"){
+        con.query("INSERT INTO profile_female values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",[userid,Name,Qualification,DOB,Age,Religion,State,District,Taluka,Village,Timeofbirth,Height,Build,Longitude,Latitude,Profile_Pic],function (error, results, fields){
+            if(error) {console.log(error);return res.status(400).json({"error":error});}
             else{
-                return res.status(200).json({"error":"already created"});}
-        }
-    })
+                return res.status(200).json({"results":results,"fields":fields});
+            }
+        })
+    }
+});
+
+app.post("/matches/female",function(req,res){
+    var lastid=req.body.lastid||"";
+    if(lastid=="")lastid=0;
+    con.query("SELECT * from profile_female where userid > ? ORDER BY userid ASC LIMIT 10",[lastid],function (error, results, fields){
+        if(error) {console.log(error);return res.status(400).json({"error":error});}
+        else{
+                return res.status(200).json(results);
+            }
+    });
 });
 
 // catch 404 and forward to error handler
@@ -178,3 +203,22 @@ app.use(function(req, res, next) {
 app.listen(80, () => console.log('Example app listening on port 80!'));
 
 module.exports = app;
+
+function calculate_age(birth_month,birth_day,birth_year)
+{
+    today_date = new Date();
+    today_year = today_date.getFullYear();
+    today_month = today_date.getMonth();
+    today_day = today_date.getDate();
+    age = today_year - birth_year;
+
+    if ( today_month < (birth_month - 1))
+    {
+        age--;
+    }
+    if (((birth_month - 1) == today_month) && (today_day < birth_day))
+    {
+        age--;
+    }
+    return age;
+}
