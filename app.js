@@ -11,7 +11,7 @@ var aws = require('aws-sdk');
 var multer = require('multer');
 var multerS3 = require('multer-s3');
 var config = require("./config");
-var jwt = require("./services/jwt");
+var jwt = require("./services/jwt")
 
 var app = express();
 var accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), {flags: 'a'});
