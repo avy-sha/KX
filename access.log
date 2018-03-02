@@ -50,3 +50,7 @@
 ::1 - - [28/Feb/2018:19:16:55 +0000] "POST /matches/female HTTP/1.1" 200 583 "-" "PostmanRuntime/6.4.1"
 ::1 - - [28/Feb/2018:19:17:50 +0000] "POST /new/registration HTTP/1.1" 200 139 "-" "PostmanRuntime/6.4.1"
 ::1 - - [28/Feb/2018:19:17:55 +0000] "POST /new/registration HTTP/1.1" 400 57 "-" "PostmanRuntime/6.4.1"
+::1 - - [01/Mar/2018:15:42:13 +0000] "POST /get/profile HTTP/1.1" 400 27 "-" "PostmanRuntime/6.4.1"
+::1 - - [01/Mar/2018:15:42:36 +0000] "POST /get/profile HTTP/1.1" 200 2 "-" "PostmanRuntime/6.4.1"
+::1 - - [01/Mar/2018:15:43:30 +0000] "POST /get/profile HTTP/1.1" 200 32 "-" "PostmanRuntime/6.4.1"
+::1 - - [01/Mar/2018:15:43:36 +0000] "POST /get/profile HTTP/1.1" 200 362 "-" "PostmanRuntime/6.4.1"

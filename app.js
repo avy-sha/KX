@@ -19,7 +19,7 @@ var accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), {
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
-
+app.set('port', (process.env.PORT || 4000));
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(bodyParser.json());
@@ -162,7 +162,7 @@ app.post("/new/registration",function(req,res){
     var Height = req.body.Height;
     var Build = req.body.Build;
     var userid= req.body.userid;
-    var Profile_Pic="";
+    var Profile_Pic="https://s3.ap-south-1.amazonaws.com/kisanx/app-uploads/Default_profile_women.jpg";
     var Longitude=1;
     var Latitude=1;
     var Timeofbirth="00:00:00";
@@ -183,6 +183,18 @@ app.post("/new/registration",function(req,res){
     }
 });
 
+app.post("/get/profile",function(req,res){
+   var userid = req.body.userid;
+   if(!userid)return res.status(400).json({"error":"Userid required"});
+    con.query("SELECT * from profile_female where userid = ?",[userid],function (error, results, fields){
+        if(error) {console.log(error);return res.status(400).json({"error":error});}
+        else{
+            if(results.length==0)return res.status(200).json({"error":"no user with that id"});
+            return res.status(200).json(results);
+        }
+    });
+});
+
 app.post("/matches/female",function(req,res){
     var lastid=req.body.lastid||"";
     if(lastid=="")lastid=0;
@@ -200,7 +212,9 @@ app.use(function(req, res, next) {
     err.status = 404;
     next(err);
 });
-app.listen(80, () => console.log('Example app listening on port 80!'));
+app.listen(app.get('port'), function () {
+    console.log('Server has started! http://localhost:' + app.get('port') + '/');
+});
 
 module.exports = app;
 
