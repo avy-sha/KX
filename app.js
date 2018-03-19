@@ -12,7 +12,7 @@ var accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), {
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
-app.set('port', (process.env.PORT || 5000));
+app.set('port', (80));
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(bodyParser.json());
