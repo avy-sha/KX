@@ -6,8 +6,6 @@ var bodyParser = require('body-parser');
 var mysql = require('mysql');
 var fs = require('fs');
 var config = require("./config");
-var jwt = require("./services/jwt")
-
 var app = express();
 var accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), {flags: 'a'});
 
@@ -200,6 +198,13 @@ app.post("/matches/female",function(req,res){
             }
     });
 });*/
+
+
+app.get("/",function (req,res) {
+        return res.status(200).json("working");
+    }
+);
+
 //get list of all the airports
 app.get("/airports/getall",function (req,res) {
         con.query("SELECT * from Airport_Details",function (error, results, fields){
