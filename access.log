@@ -68,3 +68,4 @@
 ::1 - - [19/Mar/2018:21:09:33 +0000] "POST /routes/saveroute HTTP/1.1" 200 40 "-" "PostmanRuntime/6.4.1"
 ::1 - - [19/Mar/2018:21:10:52 +0000] "POST /routes/deleteall HTTP/1.1" 400 299 "-" "PostmanRuntime/6.4.1"
 ::1 - - [19/Mar/2018:21:11:44 +0000] "POST /routes/deleteall HTTP/1.1" 200 31 "-" "PostmanRuntime/6.4.1"
+::1 - - [19/Mar/2018:22:58:02 +0000] "GET / HTTP/1.1" 200 9 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0"
