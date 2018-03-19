@@ -1,15 +1,10 @@
 var express = require('express');
 var path = require('path');
-var favicon = require('serve-favicon');
 var morgan = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var mysql = require('mysql');
-var moment = require('moment');
 var fs = require('fs');
-var aws = require('aws-sdk');
-var multer = require('multer');
-var multerS3 = require('multer-s3');
 var config = require("./config");
 var jwt = require("./services/jwt")
 
@@ -64,7 +59,7 @@ con.connect(function(err) {
     console.log("Connected!");
 });
 
-var s3 = new aws.S3({ accessKeyId:config.s3.accessKeyId , secretAccessKey:config.s3.secretAccessKey, region:config.s3.region });
+/*var s3 = new aws.S3({ accessKeyId:config.s3.accessKeyId , secretAccessKey:config.s3.secretAccessKey, region:config.s3.region });
 
 var upload = multer({
     storage: multerS3({
@@ -79,14 +74,14 @@ var upload = multer({
             cb(null, "app-uploads/" + Date.now().toString() + "-" + file.originalname)
         }
     })
-});
+});*/
 
 
 /*app.post('/upload', upload.array('photos', 3), function(req, res, next) {
     res.send('Successfully uploaded ' + req.files.length + ' files!')
 })*/
 
-app.post('/upload', upload.array('image', 2), function(req, res, next) {
+/*app.post('/upload', upload.array('image', 2), function(req, res, next) {
     try{var links=[];
         for(var i = 0 ;i< req.files.length;i++)links.push(req.files[i]['location']);
         res.status(200).json({
@@ -100,7 +95,7 @@ app.post('/upload', upload.array('image', 2), function(req, res, next) {
             "message":e
         });
     }
-});
+});*/
 
 
 /*app.use('/', index);
@@ -109,7 +104,7 @@ app.use('/users', users);*/
 /*app.use('/', index);
 */
 
-app.post("/login",function(req,res){
+/*app.post("/login",function(req,res){
     var userid = req.body.userid;
     var password = req.body.password;
     var session;
@@ -204,8 +199,60 @@ app.post("/matches/female",function(req,res){
                 return res.status(200).json(results);
             }
     });
+});*/
+//get list of all the airports
+app.get("/airports/getall",function (req,res) {
+        con.query("SELECT * from Airport_Details",function (error, results, fields){
+            if(error) {console.log(error);return res.status(400).json({"error":error});}
+            else{
+                return res.status(200).json(results);
+            }
+        });
+}
+);
+
+//get list of all the devices installed at the airport
+app.post("/devices/getall",function(req,res){
+    var Airport_id = req.body.Airport_id;
+    if(!Airport_id)return res.status(400).json({"error":"Airport_id required"});
+    con.query("SELECT * from Devices where Airport_id = ? and Node_id IS NOT NULL",[Airport_id],function (error, results, fields){
+        if(error) {console.log(error);return res.status(400).json({"error":error});}
+        else{
+            return res.status(200).json(results);
+        }
+    });
 });
 
+//post the route in the table routes
+app.post("/routes/saveroute",function(req,res){
+    var Airport_id = req.body.Airport_id;
+    var Route = req.body.Route;
+
+    if(!Airport_id || !Route )return res.status(400).json({"error":"Airport_id or Route missing !! "});
+    con.query("SELECT count(*) from Routes where Airport_id = ? ",[Airport_id],function (error, results, fields){
+        if(error) {console.log("Cannot retrieve count of routes for an airport "+ error);return res.status(400).json({"error":error});}
+        else{
+            var Route_id = Airport_id+"_"+results[0]['count(*)'];
+            con.query("INSERT INTO Routes values(?,?,?)",[Route_id,Airport_id,Route],function (error, results, fields){
+                if(error) throw err;
+                else{
+                    return res.status(200).json({"Message":"Route successfully created"});
+                }
+            });
+        }
+    });
+});
+
+//Delete all entries for a particular airport from routes testing purpose only
+app.post("/routes/deleteall",function(req,res){
+    var Airport_id = req.body.Airport_id;
+    con.query("Delete from Routes where Route_id like ?; ",[Airport_id+'%'],function (error, results, fields){
+        if(error) {console.log(error);return res.status(400).json({"error":error});}
+        else{
+            return res.status(200).json({"message":"Delete Successful"});
+        }
+    });
+});
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
     var err = new Error('Not Found');
@@ -217,22 +264,3 @@ app.listen(app.get('port'), function () {
 });
 
 module.exports = app;
-
-function calculate_age(birth_month,birth_day,birth_year)
-{
-    today_date = new Date();
-    today_year = today_date.getFullYear();
-    today_month = today_date.getMonth();
-    today_day = today_date.getDate();
-    age = today_year - birth_year;
-
-    if ( today_month < (birth_month - 1))
-    {
-        age--;
-    }
-    if (((birth_month - 1) == today_month) && (today_day < birth_day))
-    {
-        age--;
-    }
-    return age;
-}
