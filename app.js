@@ -42,17 +42,17 @@ app.use(function (req, res, next) {
 });
 
 
-var con = mysql.createConnection({
+var pool = mysql.createPool({
     host: config.db.host,
     user: config.db.user,
     password: config.db.password,
     database: config.db.database
 });
-
+/*
 con.connect(function(err) {
     if (err) throw err;
     console.log("Connected!");
-});
+});*/
 
 app.get("/",function (req,res) {
         return res.status(200).json("working");
@@ -61,12 +61,18 @@ app.get("/",function (req,res) {
 
 //get list of all the airports
 app.get("/airports/getall",function (req,res) {
-        con.query("SELECT * from Airport_Details",function (error, results, fields){
-            if(error) {console.log(error);return res.status(400).json({"error":error});}
-            else{
+    pool.getConnection(function(err, con) {
+        con.query("SELECT * from Airport_Details", function (error, results, fields) {
+            if (error) {
+                console.log(error);
+                return res.status(400).json({"error": error});
+            }
+            else {
+                con.release();
                 return res.status(200).json(results);
             }
         });
+    })
 }
 );
 
@@ -74,43 +80,58 @@ app.get("/airports/getall",function (req,res) {
 app.post("/devices/getall",function(req,res){
     var Airport_id = req.body.Airport_id;
     if(!Airport_id)return res.status(400).json({"error":"Airport_id required"});
-    con.query("SELECT * from Devices where Airport_id = ? and Node_id IS NOT NULL",[Airport_id],function (error, results, fields){
-        if(error) {console.log(error);return res.status(400).json({"error":error});}
-        else{
-            return res.status(200).json(results);
-        }
-    });
+    pool.getConnection(function(err, con) {
+        con.query("SELECT * from Devices where Airport_id = ? and Node_id IS NOT NULL", [Airport_id], function (error, results, fields) {
+            if (error) {
+                console.log(error);
+                return res.status(400).json({"error": error});
+            }
+            else { con.release();
+                return res.status(200).json(results);
+            }
+        });
+    })
 });
 
 //post the route in the table routes
-app.post("/routes/saveroute",function(req,res){
+app.post("/routes/saveroute",function(req,res) {
     var Airport_id = req.body.Airport_id;
     var Route = req.body.Route;
 
-    if(!Airport_id || !Route )return res.status(400).json({"error":"Airport_id or Route missing !! "});
-    con.query("SELECT count(*) from Routes where Airport_id = ? ",[Airport_id],function (error, results, fields){
-        if(error) {console.log("Cannot retrieve count of routes for an airport "+ error);return res.status(400).json({"error":error});}
-        else{
-            var Route_id = Airport_id+"_"+results[0]['count(*)'];
-            con.query("INSERT INTO Routes values(?,?,?)",[Route_id,Airport_id,Route],function (error, results, fields){
-                if(error) throw err;
-                else{
-                    return res.status(200).json({"Message":"Route successfully created"});
-                }
-            });
-        }
+    if (!Airport_id || !Route) return res.status(400).json({"error": "Airport_id or Route missing !! "});
+    pool.getConnection(function (err, con) {
+        con.query("SELECT count(*) from Routes where Airport_id = ? ", [Airport_id], function (error, results, fields) {
+            if (error) {
+                console.log("Cannot retrieve count of routes for an airport " + error);
+                return res.status(400).json({"error": error});
+            }
+            else {
+                var Route_id = Airport_id + "_" + results[0]['count(*)'];
+                con.query("INSERT INTO Routes values(?,?,?)", [Route_id, Airport_id, Route], function (error, results, fields) {
+                    if (error) throw err;
+                    else {con.release();
+                        return res.status(200).json({"Message": "Route successfully created"});
+                    }
+                });
+            }
+        });
     });
-});
+})
 
 //Delete all entries for a particular airport from routes testing purpose only
 app.post("/routes/deleteall",function(req,res){
     var Airport_id = req.body.Airport_id;
-    con.query("Delete from Routes where Route_id like ?; ",[Airport_id+'%'],function (error, results, fields){
-        if(error) {console.log(error);return res.status(400).json({"error":error});}
-        else{
-            return res.status(200).json({"message":"Delete Successful"});
-        }
-    });
+    pool.getConnection(function(err, con) {
+        con.query("Delete from Routes where Route_id like ?; ", [Airport_id + '%'], function (error, results, fields) {
+            if (error) {
+                console.log(error);
+                return res.status(400).json({"error": error});
+            }
+            else {con.release();
+                return res.status(200).json({"message": "Delete Successful"});
+            }
+        });
+    })
 });
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
