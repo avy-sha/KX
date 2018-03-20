@@ -25,7 +25,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 
-app.use(function (req, res, next) {
+/*app.use(function (req, res, next) {
 
     res.setHeader('Access-Control-Allow-Origin', '*');
     // Request methods you wish to allow
@@ -40,7 +40,7 @@ app.use(function (req, res, next) {
 
     // Pass to next layer of middleware
     next();
-});
+});*/
 
 
 var pool = mysql.createPool({
