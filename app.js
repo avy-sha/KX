@@ -39,7 +39,7 @@ app.use(function (req, res, next) {
     res.setHeader('Access-Control-Allow-Credentials', false);
 
     if (req.method === 'OPTIONS') {
-        res.send(404);
+        res.send(200);
     } else {
         next();
     }
